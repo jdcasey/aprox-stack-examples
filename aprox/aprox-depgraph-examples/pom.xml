@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.commonjava</groupId>
+    <artifactId>commonjava</artifactId>
+    <version>9</version>
+  </parent>
+
+  <groupId>org.commonjava.aprox.ex</groupId>
+  <artifactId>aprox-depgraph-examples</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>aprox-depgraph-examples</name>
+
+  <properties>
+    <enforceStandards>false</enforceStandards>
+    <enforceBestPractices>false</enforceBestPractices>
+    <javaVersion>1.8</javaVersion>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.commonjava.aprox</groupId>
+      <artifactId>aprox-depgraph-client-java</artifactId>
+      <version>0.24.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
