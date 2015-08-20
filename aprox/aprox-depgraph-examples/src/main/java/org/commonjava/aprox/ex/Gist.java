@@ -21,7 +21,6 @@ import org.commonjava.aprox.depgraph.client.DepgraphAproxClientModule;
 import org.commonjava.cartographer.graph.discover.patch.DepgraphPatcherConstants;
 import org.commonjava.cartographer.request.MetadataCollationRequest;
 import org.commonjava.cartographer.request.ProjectGraphRequest;
-import org.commonjava.cartographer.graph.discover.patch.DepgraphPatcher;
 import org.commonjava.cartographer.result.GraphExport;
 import org.commonjava.cartographer.result.MetadataCollationEntry;
 import org.commonjava.cartographer.result.MetadataCollationResult;
@@ -31,30 +30,42 @@ import org.commonjava.maven.atlas.graph.traverse.model.BuildOrder;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
+import java.io.Closeable;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by jdcasey on 8/19/15.
  */
 public class Gist
+        implements Closeable
 {
+
+    private final DepgraphAproxClientModule mod;
+
+    private final Aprox aprox;
+
+    private String url;
+
+    public Gist( String url )
+            throws AproxClientException
+    {
+        this.url = url;
+        mod = new DepgraphAproxClientModule();
+        aprox = new Aprox( url, mod ).connect();
+    }
 
     public void exportGraph()
             throws AproxClientException
     {
-        DepgraphAproxClientModule mod = new DepgraphAproxClientModule();
-        Aprox aprox = new Aprox( "http://localhost:8080/api", mod ).connect();
-
         ProjectGraphRequest req = mod.newProjectGraphRequest()
+                                     .withWorkspaceId( "graph-export" )
                                      .withSource( "group:public" )
                                      .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                      .withResolve( true )
                                      .withGraph( mod.newGraphDescription()
-                                                    .withRoots( new ProjectVersionRef( "org.commonjava.aprox.embed",
-                                                                                       "aprox-embedder-savant",
-                                                                                       "0.23.2" ) )
+                                                    .withRoots( new ProjectVersionRef( "org.commonjava.util",
+                                                                                       "partyline",
+                                                                                       "1.4" ) )
                                                     .withPreset( "build-requires" )
                                                     .build() )
                                      .build();
@@ -73,17 +84,16 @@ public class Gist
     public void collateByScmUrlAndGroupId()
             throws AproxClientException
     {
-        DepgraphAproxClientModule mod = new DepgraphAproxClientModule();
-        Aprox aprox = new Aprox( "http://localhost:8080/api", mod ).connect();
-
         MetadataCollationRequest req = mod.newMetadataCollationRequest()
+                                          .withWorkspaceId( "collation" )
                                           .withKeys( Arrays.asList( "scm-url", "groupId" ) )
                                           .withResolve( true )
                                           .withSource( "group:public" )
                                           .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                           .withGraph( mod.newGraphDescription()
-                                                         .withRoots( Arrays.asList( ProjectVersionRef.parse(
-                                                                 "org.commonjava.aprox.embed:aprox-embedder-savant:0.23.2" ) ) )
+                                                         .withRoots(
+                                                                 new ProjectVersionRef( "org.commonjava.util", "partyline",
+                                                                                        "1.4" ) )
                                                          .withPreset( "build-requires" )
                                                          .build() )
                                           .build();
@@ -110,16 +120,15 @@ public class Gist
     public void buildOrder()
             throws AproxClientException
     {
-        DepgraphAproxClientModule mod = new DepgraphAproxClientModule();
-        Aprox aprox = new Aprox( "http://localhost:8080/api", mod ).connect();
-
         ProjectGraphRequest req = mod.newProjectGraphRequest()
+                                     .withWorkspaceId( "build-order" )
                                      .withResolve( true )
                                      .withSource( "group:public" )
                                      .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                      .withGraph( mod.newGraphDescription()
-                                                    .withRoots( ProjectVersionRef.parse(
-                                                            "org.commonjava.aprox.embed:aprox-embedder-savant:0.23.2" ) )
+                                                    .withRoots( new ProjectVersionRef( "org.commonjava.util",
+                                                                                       "partyline",
+                                                                                       "1.4" ) )
                                                     .withPreset( "build-requires" )
                                                     .build() )
                                      .build();
@@ -138,5 +147,10 @@ public class Gist
         {
             System.out.println( Integer.toString( i ) + ". " + cycle.getAllParticipatingProjects() );
         }
+    }
+
+    public void close()
+    {
+        aprox.close();
     }
 }
