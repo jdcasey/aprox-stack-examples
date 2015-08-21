@@ -143,9 +143,12 @@ public class Gist
 
         System.out.println( "\n\nDependency Cycles:" );
         int i = 0;
-        for ( EProjectCycle cycle : result.getCycles() )
+        if ( result.getCycles() != null )
         {
-            System.out.println( Integer.toString( i ) + ". " + cycle.getAllParticipatingProjects() );
+            for ( EProjectCycle cycle : result.getCycles() )
+            {
+                System.out.println( Integer.toString( i ) + ". " + cycle.getAllParticipatingProjects() );
+            }
         }
     }
 

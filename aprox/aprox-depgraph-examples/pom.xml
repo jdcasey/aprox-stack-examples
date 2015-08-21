@@ -76,7 +76,10 @@
                 <forkCount>1</forkCount>
                 <reuseForks>false</reuseForks>
                 <redirectTestOutputToFile>true</redirectTestOutputToFile>
-              </configuration>
+<!--                 <includes>
+                  <include>**/BuildOrderTest*</include>
+                </includes>
+ -->              </configuration>
             </execution>
           </executions>
         </plugin>
