@@ -21,9 +21,7 @@ import org.commonjava.aprox.depgraph.client.DepgraphAproxClientModule;
 import org.commonjava.cartographer.graph.discover.patch.DepgraphPatcherConstants;
 import org.commonjava.cartographer.request.MetadataCollationRequest;
 import org.commonjava.cartographer.request.ProjectGraphRequest;
-import org.commonjava.cartographer.result.GraphExport;
-import org.commonjava.cartographer.result.MetadataCollationEntry;
-import org.commonjava.cartographer.result.MetadataCollationResult;
+import org.commonjava.cartographer.result.*;
 import org.commonjava.maven.atlas.graph.model.EProjectCycle;
 import org.commonjava.maven.atlas.graph.rel.ProjectRelationship;
 import org.commonjava.maven.atlas.graph.traverse.model.BuildOrder;
@@ -32,6 +30,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 import java.io.Closeable;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by jdcasey on 8/19/15.
@@ -78,6 +77,28 @@ public class Gist
             ProjectVersionRef targeting = rel.getTargetArtifact();
 
             System.out.printf( "Relationship (type: %s) from: %s to: %s", rel.getType(), declaring, targeting );
+        }
+
+        req.setResolve( false ); // get ready to resubmit to retrieve errors...don't re-resolve.
+        ProjectErrors errors = mod.errors( req );
+
+        System.out.println( "Got project errors (during graph discovery):\n" );
+        int i=0;
+        if ( errors != null )
+        {
+            List<ProjectError> projects = errors.getProjects();
+            if ( projects != null )
+            {
+                for ( ProjectError error : projects )
+                {
+                    System.out.printf( "\n%d. %s:\n\n%s\n\n", i++, error.getProject(), error.getError() );
+                }
+            }
+        }
+
+        if ( i < 1)
+        {
+            System.out.println( "\n  None\n" );
         }
     }
 
