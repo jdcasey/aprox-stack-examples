@@ -27,6 +27,7 @@ import org.commonjava.maven.atlas.graph.rel.ProjectRelationship;
 import org.commonjava.maven.atlas.graph.traverse.model.BuildOrder;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 
 import java.io.Closeable;
 import java.util.Arrays;
@@ -62,16 +63,18 @@ public class Gist
                                      .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                      .withResolve( true )
                                      .withGraph( mod.newGraphDescription()
-                                                    .withRoots( new ProjectVersionRef( "org.commonjava.util",
+                                                    .withRoots( new SimpleProjectVersionRef( "org.commonjava.util",
                                                                                        "partyline",
                                                                                        "1.4" ) )
+//                                                         .withRoots( new SimpleProjectVersionRef( "dom4j",
+//                                                                                                  "dom4j", "1.6.1" ) )
                                                     .withPreset( "build-requires" )
                                                     .build() )
                                      .build();
 
         GraphExport export = mod.graph( req );
 
-        for ( ProjectRelationship<?> rel : export.getRelationships() )
+        for ( ProjectRelationship<?, ?> rel : export.getRelationships() )
         {
             ProjectVersionRef declaring = rel.getDeclaring();
             ProjectVersionRef targeting = rel.getTargetArtifact();
@@ -113,7 +116,7 @@ public class Gist
                                           .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                           .withGraph( mod.newGraphDescription()
                                                          .withRoots(
-                                                                 new ProjectVersionRef( "org.commonjava.util", "partyline",
+                                                                 new SimpleProjectVersionRef( "org.commonjava.util", "partyline",
                                                                                         "1.4" ) )
                                                          .withPreset( "build-requires" )
                                                          .build() )
@@ -147,7 +150,7 @@ public class Gist
                                      .withSource( "group:public" )
                                      .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                      .withGraph( mod.newGraphDescription()
-                                                    .withRoots( new ProjectVersionRef( "org.commonjava.util",
+                                                    .withRoots( new SimpleProjectVersionRef( "org.commonjava.util",
                                                                                        "partyline",
                                                                                        "1.4" ) )
                                                     .withPreset( "build-requires" )
