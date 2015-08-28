@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -64,7 +64,7 @@ public class RelationshipReader
         ProjectVersionRef gav = pp.getKey();
 
         List<? extends Location> repoLocations =
-                Collections.singletonList( new SimpleLocation( "central", "http://repo.maven.apache.org/maven2/" ) );
+                Arrays.asList( location, new SimpleLocation( "central", "http://repo.maven.apache.org/maven2/" ) );
 
         MavenPomView pomView = pomReader.read( gav, txfr, repoLocations );
         URI src = new URI( location.getUri() );
