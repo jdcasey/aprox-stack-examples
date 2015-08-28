@@ -1,0 +1,89 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.commonjava</groupId>
+    <artifactId>commonjava</artifactId>
+    <version>9</version>
+  </parent>
+
+  <groupId>org.commonjava.cartographer.ex</groupId>
+  <artifactId>cartographer-modelproc-example</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>cartographer-modelproc-example</name>
+
+  <properties>
+    <enforceStandards>false</enforceStandards>
+    <enforceBestPractices>false</enforceBestPractices>
+    <javaVersion>1.8</javaVersion>
+    <cartoVersion>0.9.4-SNAPSHOT</cartoVersion>
+    <galleyVersion>0.9.4-SNAPSHOT</galleyVersion>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.commonjava.maven.cartographer</groupId>
+      <artifactId>cartographer</artifactId>
+      <version>${cartoVersion}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-maven</artifactId>
+      <version>${galleyVersion}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>1.3</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-test</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+<!-- 
+                <forkCount>1</forkCount>
+                <reuseForks>false</reuseForks>
+                <redirectTestOutputToFile>true</redirectTestOutputToFile>
+ -->
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+</project>
