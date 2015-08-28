@@ -5,8 +5,11 @@ import static org.hamcrest.CoreMatchers.*;
 
 import org.commonjava.cartographer.CartoDataException;
 import org.commonjava.maven.atlas.graph.rel.ProjectRelationship;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,25 +27,31 @@ public class RelationshipReaderTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
+    private static final ProjectVersionRef CHILD_POM = new SimpleProjectVersionRef( "org.commonjava.cartographer.ex", "foo", "1.0" );
+    private static final String[] POMS = {
+            "foo-1.0.pom",
+            "foo-parent-5.pom"
+    };
+
     private RelationshipReader reader;
+
+    private File pomRepoDir;
 
     @Before
     public void before()
             throws Exception
     {
+        pomRepoDir = temp.newFolder( "pom-origin" );
         reader = new RelationshipReader( temp.newFolder() );
+        reader.setupRepositoryDirectoryFromClasspath( pomRepoDir, POMS );
     }
 
     @Test
     public void readRelationshipsFromPomNoParent()
             throws URISyntaxException, CartoDataException, TransferException, GalleyMavenException
     {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource( "foo-1.0.pom" );
-        assertThat( resource, notNullValue() );
 
-        File pom = new File( resource.getPath() );
-
-        Set<ProjectRelationship<?, ?>> relationships = reader.readRelationships( pom );
+        Set<ProjectRelationship<?, ?>> relationships = reader.readRelationships( pomRepoDir, CHILD_POM );
 
         // can be null...
         if ( relationships != null )

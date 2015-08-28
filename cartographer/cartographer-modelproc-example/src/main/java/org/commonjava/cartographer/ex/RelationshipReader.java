@@ -1,5 +1,7 @@
 package org.commonjava.cartographer.ex;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.cartographer.CartoDataException;
 import org.commonjava.cartographer.CartographerCore;
 import org.commonjava.cartographer.CartographerCoreBuilder;
@@ -11,9 +13,11 @@ import org.commonjava.maven.atlas.graph.spi.neo4j.FileNeo4jConnectionFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.maven.parse.MavenPomReader;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
+import org.commonjava.maven.galley.maven.util.ArtifactPathUtils;
 import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.model.SimpleLocation;
@@ -23,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -48,25 +53,36 @@ public class RelationshipReader
                                                                                              .build();
     }
 
-    public Set<ProjectRelationship<?, ?>> readRelationships( File pom )
+    public Set<ProjectRelationship<?, ?>> readRelationships( File pomRepoDir, ProjectVersionRef gav )
             throws TransferException, GalleyMavenException, URISyntaxException, CartoDataException
     {
         MavenPomReader pomReader = carto.getGalley().getPomReader();
         MavenModelProcessor processor = new MavenModelProcessor();
 
-        File dir = pom.getParentFile();
-        Location location = new SimpleLocation( "file:" + dir.getAbsolutePath() );
-
-        Transfer txfr =
-                carto.getGalley().getTransferManager().retrieve( new ConcreteResource( location, pom.getName() ) );
-
-        PomPeek pp = new PomPeek( txfr );
-        ProjectVersionRef gav = pp.getKey();
+        Location location = new SimpleLocation( "file:" + pomRepoDir.getAbsolutePath() );
 
         List<? extends Location> repoLocations =
                 Arrays.asList( location, new SimpleLocation( "central", "http://repo.maven.apache.org/maven2/" ) );
 
-        MavenPomView pomView = pomReader.read( gav, txfr, repoLocations );
+        MavenPomView pomView = pomReader.read( gav, repoLocations );
+
+        // some debug output from the pom view itself
+        System.out.println( "Docs in view:\n  " + StringUtils.join( pomView.getDocRefStack(), "\n  " ) );
+
+        System.out.println( "Found dependency artifacts:" );
+        List<DependencyView> deps = pomView.getAllDirectDependencies();
+        deps.forEach( ( dep ) -> {
+            try
+            {
+                System.out.println( dep.asArtifactRef() );
+            }
+            catch ( GalleyMavenException e )
+            {
+                e.printStackTrace();
+            }
+        } );
+        // back to the main event...
+
         URI src = new URI( location.getUri() );
 
         DiscoveryConfig disConf = new DiscoveryConfig( src );
@@ -77,5 +93,25 @@ public class RelationshipReader
         DiscoveryResult result = processor.readRelationships( pomView, src, disConf );
 
         return result.getAcceptedRelationships();
+    }
+
+    public void setupRepositoryDirectoryFromClasspath( File dir, String[] poms )
+            throws TransferException, IOException
+    {
+        for ( String pom: poms )
+        {
+            URL resource = Thread.currentThread().getContextClassLoader().getResource( pom );
+            assert( resource != null );
+
+            File pomFile = new File( resource.getPath() );
+            PomPeek peek = new PomPeek( pomFile );
+
+            String path = ArtifactPathUtils.formatArtifactPath( peek.getKey().asPomArtifact(),
+                                                             carto.getGalley().getTypeMapper() );
+
+            File f = new File( dir, path );
+            f.getParentFile().mkdirs();
+            FileUtils.copyFile( pomFile, f );
+        }
     }
 }
