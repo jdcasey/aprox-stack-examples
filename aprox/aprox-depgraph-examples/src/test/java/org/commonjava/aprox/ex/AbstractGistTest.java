@@ -15,7 +15,7 @@ public class AbstractGistTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
-    protected CoreServerFixture fixture;
+//    protected CoreServerFixture fixture;
 
     protected Gist gist;
 
@@ -23,10 +23,11 @@ public class AbstractGistTest
     public void before()
             throws Exception
     {
-        fixture = new CoreServerFixture( temp );
-        fixture.start();
+//        fixture = new CoreServerFixture( temp );
+//        fixture.start();
 
-        gist = new Gist( fixture.getUrl() );
+//        gist = new Gist( fixture.getUrl() );
+        gist = new Gist( "http://10.3.8.115/api" );
     }
 
     @After
@@ -37,10 +38,10 @@ public class AbstractGistTest
             gist.close();
         }
 
-        if ( fixture != null )
-        {
-            fixture.close();
-        }
+//        if ( fixture != null )
+//        {
+//            fixture.close();
+//        }
     }
 
 }

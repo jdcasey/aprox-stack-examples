@@ -18,7 +18,7 @@
     <enforceStandards>false</enforceStandards>
     <enforceBestPractices>false</enforceBestPractices>
     <javaVersion>1.8</javaVersion>
-    <aproxVersion>0.24.0-SNAPSHOT</aproxVersion>
+    <aproxVersion>0.24.0</aproxVersion>
   </properties>
 
   <dependencies>
@@ -40,12 +40,11 @@
       <version>${aproxVersion}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.10.2.0</version>
-      <scope>test</scope>
-    </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.188</version>
+      </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -73,13 +72,10 @@
                 <goal>test</goal>
               </goals>
               <configuration>
-<!--                 <forkCount>1</forkCount>
+                <forkCount>1</forkCount>
                 <reuseForks>false</reuseForks>
                 <redirectTestOutputToFile>true</redirectTestOutputToFile>
- --><!--                 <includes>
-                  <include>**/BuildOrderTest*</include>
-                </includes>
- -->              </configuration>
+              </configuration>
             </execution>
           </executions>
         </plugin>
