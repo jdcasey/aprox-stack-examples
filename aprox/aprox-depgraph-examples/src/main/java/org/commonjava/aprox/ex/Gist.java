@@ -54,55 +54,62 @@ public class Gist
         aprox = new Aprox( url, mod ).connect();
     }
 
-    public void exportGraph()
+    public GraphExport exportGraph()
             throws AproxClientException
     {
+        ProjectVersionRef pvr = new SimpleProjectVersionRef( "xom",
+                                                             "xom", "1.2.5" );
+
         ProjectGraphRequest req = mod.newProjectGraphRequest()
-                                     .withWorkspaceId( "graph-export" )
+                                     .withWorkspaceId( "export-" + pvr.toString() )
                                      .withSource( "group:public" )
                                      .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
                                      .withResolve( true )
                                      .withGraph( mod.newGraphDescription()
-                                                    .withRoots( new SimpleProjectVersionRef( "org.commonjava.util",
-                                                                                       "partyline",
-                                                                                       "1.4" ) )
-//                                                         .withRoots( new SimpleProjectVersionRef( "dom4j",
-//                                                                                                  "dom4j", "1.6.1" ) )
-                                                    .withPreset( "build-requires" )
+//                                                    .withRoots( new SimpleProjectVersionRef( "org.commonjava.util",
+//                                                                                       "partyline",
+//                                                                                       "1.4" ) )
+                                                         .withRoots( pvr )
+                                                    .withPreset( "requires" )
                                                     .build() )
                                      .build();
 
         GraphExport export = mod.graph( req );
 
-        for ( ProjectRelationship<?, ?> rel : export.getRelationships() )
+        if ( export != null )
         {
-            ProjectVersionRef declaring = rel.getDeclaring();
-            ProjectVersionRef targeting = rel.getTargetArtifact();
-
-            System.out.printf( "Relationship (type: %s) from: %s to: %s", rel.getType(), declaring, targeting );
-        }
-
-        req.setResolve( false ); // get ready to resubmit to retrieve errors...don't re-resolve.
-        ProjectErrors errors = mod.errors( req );
-
-        System.out.println( "Got project errors (during graph discovery):\n" );
-        int i=0;
-        if ( errors != null )
-        {
-            List<ProjectError> projects = errors.getProjects();
-            if ( projects != null )
+            for ( ProjectRelationship<?, ?> rel : export.getRelationships() )
             {
-                for ( ProjectError error : projects )
+                ProjectVersionRef declaring = rel.getDeclaring();
+                ProjectVersionRef targeting = rel.getTargetArtifact();
+
+                System.out.printf( "Relationship (type: %s) from: %s to: %s", rel.getType(), declaring, targeting );
+            }
+
+            req.setResolve( false ); // get ready to resubmit to retrieve errors...don't re-resolve.
+            ProjectErrors errors = export.getErrors();
+
+            System.out.println( "Got project errors (during graph discovery):\n" );
+            int i=0;
+            if ( errors != null )
+            {
+                List<ProjectError> projects = errors.getProjects();
+                if ( projects != null )
                 {
-                    System.out.printf( "\n%d. %s:\n\n%s\n\n", i++, error.getProject(), error.getError() );
+                    for ( ProjectError error : projects )
+                    {
+                        System.out.printf( "\n%d. %s:\n\n%s\n\n", i++, error.getProject(), error.getError() );
+                    }
                 }
+            }
+
+            if ( i < 1)
+            {
+                System.out.println( "\n  None\n" );
             }
         }
 
-        if ( i < 1)
-        {
-            System.out.println( "\n  None\n" );
-        }
+        return export;
     }
 
     public void collateByScmUrlAndGroupId()
