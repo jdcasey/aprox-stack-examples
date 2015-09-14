@@ -19,7 +19,7 @@
     <enforceBestPractices>false</enforceBestPractices>
     <javaVersion>1.8</javaVersion>
     <cartoVersion>0.10.0</cartoVersion>
-    <galleyVersion>0.9.3.1</galleyVersion>
+    <galleyVersion>0.10.0</galleyVersion>
   </properties>
 
   <dependencies>
