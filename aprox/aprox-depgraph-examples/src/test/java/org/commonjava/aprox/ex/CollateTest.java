@@ -11,6 +11,7 @@ public class CollateTest
 {
 
     @Test
+    @Ignore
     public void collateByScmUrlAndGroupId()
             throws Exception
     {

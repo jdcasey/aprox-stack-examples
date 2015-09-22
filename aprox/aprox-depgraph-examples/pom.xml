@@ -18,7 +18,7 @@
     <enforceStandards>false</enforceStandards>
     <enforceBestPractices>false</enforceBestPractices>
     <javaVersion>1.8</javaVersion>
-    <aproxVersion>0.24.0</aproxVersion>
+    <aproxVersion>0.25.0-SNAPSHOT</aproxVersion>
   </properties>
 
   <dependencies>

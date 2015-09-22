@@ -18,9 +18,13 @@ package org.commonjava.aprox.ex;
 import org.commonjava.aprox.client.core.Aprox;
 import org.commonjava.aprox.client.core.AproxClientException;
 import org.commonjava.aprox.depgraph.client.DepgraphAproxClientModule;
+import org.commonjava.aprox.depgraph.model.ArtifactRepoContent;
+import org.commonjava.aprox.depgraph.model.ProjectRepoContent;
+import org.commonjava.aprox.depgraph.model.RepoContentResult;
 import org.commonjava.cartographer.graph.discover.patch.DepgraphPatcherConstants;
 import org.commonjava.cartographer.request.MetadataCollationRequest;
 import org.commonjava.cartographer.request.ProjectGraphRequest;
+import org.commonjava.cartographer.request.RepositoryContentRequest;
 import org.commonjava.cartographer.result.*;
 import org.commonjava.maven.atlas.graph.model.EProjectCycle;
 import org.commonjava.maven.atlas.graph.rel.ProjectRelationship;
@@ -30,8 +34,12 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 /**
  * Created by jdcasey on 8/19/15.
@@ -52,6 +60,66 @@ public class Gist
         this.url = url;
         mod = new DepgraphAproxClientModule();
         aprox = new Aprox( url, mod ).connect();
+    }
+
+    public ZipInputStream zipRepoContent()
+            throws AproxClientException, IOException
+    {
+        ProjectVersionRef pvr = new SimpleProjectVersionRef( "org.commonjava.aprox.launch",
+                                                             "aprox-launcher-savant", "0.24.0" );
+
+        RepositoryContentRequest req = mod.newRepositoryContentRequest()
+                                          .withWorkspaceId( "content-" + pvr.toString() )
+                                          .withSource( "group:public" )
+                                          .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
+                                          .withResolve( true )
+                                          .withGraphs( mod.newGraphComposition()
+                                                          .withGraph( mod.newGraphDescription()
+                                                                         .withRoots( pvr )
+                                                                         .withPreset( "runtime" )
+                                                                         .build() )
+                                                          .build() )
+                                          .withMetas( RepositoryContentRequest.NO_METAS_SET )
+                                          .build();
+
+        return new ZipInputStream( mod.repositoryZip( req ) );
+    }
+
+    public RepoContentResult graphRepoContent()
+            throws AproxClientException
+    {
+        ProjectVersionRef pvr = new SimpleProjectVersionRef( "org.commonjava.aprox.launch",
+                                                             "aprox-launcher-savant", "0.24.0" );
+
+        RepositoryContentRequest req = mod.newRepositoryContentRequest()
+                                     .withWorkspaceId( "content-" + pvr.toString() )
+                                     .withSource( "group:public" )
+                                     .withPatcherIds( DepgraphPatcherConstants.ALL_PATCHERS )
+                                     .withResolve( true )
+                                     .withGraphs( mod.newGraphComposition()
+                                                     .withGraph( mod.newGraphDescription()
+                                                                    .withRoots( pvr )
+                                                                    .withPreset( "runtime" )
+                                                                    .build() )
+                                                     .build() )
+                                     .withMetas( RepositoryContentRequest.NO_METAS_SET )
+                                     .build();
+
+        RepoContentResult result = mod.repositoryContent( req );
+
+        if ( result != null )
+        {
+            for ( ProjectVersionRef ref : result )
+            {
+                ProjectRepoContent projectContent = result.getProject( ref );
+                for ( ArtifactRepoContent arc : projectContent )
+                {
+                    System.out.println( arc.getArtifact().toString() );
+                }
+            }
+        }
+
+        return result;
     }
 
     public GraphExport exportGraph()
